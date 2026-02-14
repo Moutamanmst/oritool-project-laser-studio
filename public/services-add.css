@@ -1,0 +1,40 @@
+/* Service Price Row */
+.service-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.service-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+    /* Override default margin */
+}
+
+.btn-add-service {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(139, 122, 115, 0.2);
+}
+
+.btn-add-service:hover {
+    background: var(--color-accent);
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(212, 139, 168, 0.3);
+}
+
+.btn-add-service i {
+    font-size: 14px;
+}

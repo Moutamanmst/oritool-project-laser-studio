@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін-панель</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <style>
+        /* Crop Modal Styles */
+        .crop-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crop-container {
+            max-width: 90%;
+            max-height: 80vh;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .crop-image-wrapper {
+            max-width: 100%;
+            max-height: 60vh;
+            overflow: hidden;
+        }
+
+        .crop-container img {
+            max-width: 100%;
+        }
+
+        .crop-actions button {
+            margin: 0 10px;
+        }
+
+        .crop-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            vertical-align: middle;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #4CAF50;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #4CAF50;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Admin Specific Styles */
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            color: var(--color-primary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--color-text-light);
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--color-primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(189, 142, 126, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Forms */
+        .admin-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text-light);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Image Upload */
+        .image-preview-container {
+            margin-top: 10px;
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn-upload {
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            background-color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Dynamic Lists (Portfolio) */
+        .portfolio-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .portfolio-item-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid #eee;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .btn-delete:hover {
+            background: #ffebee;
+            color: #ff4444;
+            border-color: #ffcdd2;
+            transform: scale(1.1);
+        }
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+
+        .add-btn {
+            background: var(--color-secondary);
+            color: var(--color-text-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        /* Save Button */
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            box-shadow: 0 4px 20px rgba(189, 142, 126, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(189, 142, 126, 0.5);
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .success-message.show {
+            transform: translateY(0);
+        }
+        
+        /* Blog Admin Cards */
+        .blog-post-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .blog-post-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .admin-card {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="admin-header">
+        <div class="container">
+            <div class="admin-nav">
+                <span class="admin-title">Rymarchuk Admin</span>
+                <a href="/admin/logout" style="color: #666; text-decoration: none;">Вийти</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" style="padding-bottom: 100px;">
+        <div class="tabs">
+            <button type="button" class="tab-btn active" onclick="openTab('appointments')">Записи</button>
+            <button class="tab-btn" onclick="openTab('general')">Загальні</button>
+            <button class="tab-btn" onclick="openTab('hero')">Головний екран</button>
+            <button class="tab-btn" onclick="openTab('about')">Про нас</button>
+            <button class="tab-btn" onclick="openTab('services')">Послуги</button>
+            <button class="tab-btn" onclick="openTab('portfolio')">Портфоліо</button>
+            <button type="button" class="tab-btn" onclick="openTab('blog')">📝 Блог</button>
+            <button type="button" class="tab-btn" onclick="openTab('seo')">SEO</button>
+            <button type="button" class="tab-btn" onclick="openTab('booking')">Вікно для запису</button>
+            <button type="button" class="tab-btn" onclick="openTab('prices')">Прайс</button>
+            <button type="button" class="tab-btn" onclick="openTab('testdrive')">Тест-драйв</button>
+        </div>
+
+        <form id="contentForm">
+            <!-- General Tab -->
+            <div id="general" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">Контакти</h2>
+                    <div class="form-group">
+                        <label>Телефон (відображення)</label>
+                        <input type="text" name="site[phone]" id="sitePhone" value="<%= content.site.phone %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон (посилання)</label>
+                        <input type="text" name="site[phoneLink]" value="<%= content.site.phoneLink %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Instagram</label>
+                        <input type="text" name="site[instagram]" value="<%= content.site.instagram %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Графік роботи</label>
+                        <input type="text" name="site[schedule]" id="siteSchedule" value="<%= content.site.schedule %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Текст у футері</label>
+                        <input type="text" name="site[footerText]" value="<%= content.site.footerText %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Tab -->
+            <div id="hero" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">Головний екран</h2>
+
+                    <div class="form-group">
+                        <label>Фонове фото</label>
+                        <input type="hidden" name="hero[image]" id="heroImageInput" value="<%= content.hero.image %>">
+                        <div class="image-preview-container">
+                            <img src="<%= content.hero.image.startsWith('http') || content.hero.image.startsWith('/') ? content.hero.image : '/' + content.hero.image %>"
+                                class="image-preview show" id="heroImagePreview">
+                        </div>
+                        <div class="upload-btn-wrapper">
+                            <button class="btn-upload" type="button">Змінити фон</button>
+                            <input type="file" onchange="uploadImage(this, 'heroImageInput', 'heroImagePreview')">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Заголовок</label>
+                        <input type="text" name="hero[title]" id="heroTitle" value="<%= content.hero.title %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Підзаголовок</label>
+                        <input type="text" name="hero[subtitle]" id="heroSubtitle" value="<%= content.hero.subtitle %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Акція</label>
+                        <input type="text" name="hero[promo]" id="heroPromo" value="<%= content.hero.promo %>">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="hero[showPromo]" value="true" <%=content.hero.showPromo
+                                ? 'checked' : '' %>>
+                            <span class="slider"></span>
+                        </label>
+                        <span style="margin-left: 15px; font-weight: 500;">Відображати акцію (-50%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div id="about" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">Інформація про майстра</h2>
+
+                    <div class="form-group">
+                        <label>Фото майстра</label>
+                        <input type="hidden" name="about[image]" id="aboutImageInput"
+                            value="<%= content.about.image %>">
+                        <div class="image-preview-container">
+                            <img src="<%= content.about.image.startsWith('http') || content.about.image.startsWith('/') ? content.about.image : '/' + content.about.image %>"
+                                class="image-preview show" id="aboutImagePreview">
+                        </div>
+                        <div class="upload-btn-wrapper">
+                            <button class="btn-upload" type="button">Завантажити фото</button>
+                            <input type="file" onchange="uploadImage(this, 'aboutImageInput', 'aboutImagePreview')">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Заголовок</label>
+                        <input type="text" name="about[title]" id="aboutTitle" value="<%= content.about.title %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Текст 1</label>
+                        <textarea name="about[text1]" id="aboutText1"><%= content.about.text1 %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Текст 2</label>
+                        <textarea name="about[text2]" id="aboutText2"><%= content.about.text2 %></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Переваги (Чек-лист)</label>
+                        <% content.about.checklist.forEach(function(item, index) { %>
+                            <input type="text" name="about[checklist][<%= index %>]" value="<%= item %>"
+                                style="margin-bottom: 10px;" placeholder="Пункт <%= index + 1 %>">
+                            <% }); %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div id="services" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">Послуги</h2>
+                    <div class="portfolio-list" id="servicesList">
+                        <% if (content.services) { %>
+                            <% content.services.forEach(function(item, index) { %>
+                                <div class="portfolio-item-card service-item-card">
+                                    <button type="button" class="delete-btn" onclick="this.parentElement.remove()"><i
+                                            class="fas fa-times"></i></button>
+
+                                    <div class="form-group">
+                                        <label>Фото</label>
+                                        <input type="hidden" name="services[<%= index %>][image]"
+                                            class="service-image-input" value="<%= item.image %>">
+                                        <div class="image-preview-container">
+                                            <img src="<%= item.image.startsWith('http') || item.image.startsWith('/') ? item.image : '/' + item.image %>"
+                                                class="image-preview show service-preview">
+                                        </div>
+                                        <div class="upload-btn-wrapper">
+                                            <button class="btn-upload" type="button">Змінити</button>
+                                            <input type="file"
+                                                onchange="uploadImage(this, this.parentElement.previousElementSibling.previousElementSibling, this.parentElement.previousElementSibling.querySelector('img'))">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Назва</label>
+                                        <input type="text" name="services[<%= index %>][title]"
+                                            id="serviceTitle<%= index %>" value="<%= item.title %>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Опис</label>
+                                        <textarea name="services[<%= index %>][description]"
+                                            id="serviceDesc<%= index %>"><%= item.description %></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Ціна</label>
+                                        <input type="text" name="services[<%= index %>][price]"
+                                            id="servicePrice<%= index %>" value="<%= item.price %>">
+                                    </div>
+                                </div>
+                                <% }); %>
+                                    <% } %>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addServiceItem()">
+                        <i class="fas fa-plus"></i> Додати послугу
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portfolio Tab -->
+            <div id="portfolio" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">Наші роботи</h2>
+                    <div class="portfolio-list" id="portfolioList">
+                        <% content.portfolio.forEach(function(item, index) { %>
+                            <div class="portfolio-item-card">
+                                <button type="button" class="delete-btn" onclick="this.parentElement.remove()"><i
+                                        class="fas fa-times"></i></button>
+
+                                <div class="form-group">
+                                    <label>Фото</label>
+                                    <input type="hidden" name="portfolio[<%= index %>][image]"
+                                        class="portfolio-image-input" value="<%= item.image %>">
+                                    <div class="image-preview-container">
+                                        <img src="<%= item.image.startsWith('http') || item.image.startsWith('/') ? item.image : '/' + item.image %>"
+                                            class="image-preview show portfolio-preview">
+                                    </div>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn-upload" type="button">Змінити</button>
+                                        <input type="file"
+                                            onchange="uploadImage(this, this.parentElement.previousElementSibling.previousElementSibling, this.parentElement.previousElementSibling.querySelector('img'))">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Підпис</label>
+                                    <input type="text" name="portfolio[<%= index %>][title]"
+                                        id="portfolioTitle<%= index %>" value="<%= item.title %>">
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addPortfolioItem()">
+                        <i class="fas fa-plus"></i> Додати роботу
+                    </button>
+                </div> <!-- End of Portfolio Tab -->
+            </div>
+
+            <!-- SEO Tab -->
+            <div id="seo" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">🌐 Глобальні SEO Налаштування</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Ці налаштування застосовуються до всього сайту</p>
+
+                    <div class="form-group">
+                        <label>Назва сайту</label>
+                        <input type="text" name="seo[global][siteName]" value="<%= content.seo?.global?.siteName || 'Laser Studio Rymarchuk' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>URL сайту (без / в кінці)</label>
+                        <input type="text" name="seo[global][siteUrl]" value="<%= content.seo?.global?.siteUrl || 'https://rymarchuk.vn.ua' %>" placeholder="https://rymarchuk.vn.ua">
+                    </div>
+                    <div class="form-group">
+                        <label>Зображення за замовчуванням (OG Image)</label>
+                        <input type="text" name="seo[global][defaultImage]" value="<%= content.seo?.global?.defaultImage || '/master_new.jpg' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Локаль сайту</label>
+                        <input type="text" name="seo[global][locale]" value="<%= content.seo?.global?.locale || 'uk_UA' %>">
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2 class="section-header">🏢 Дані організації (Schema.org)</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Використовується для структурованих даних Google</p>
+
+                    <div class="form-group">
+                        <label>Юридична назва</label>
+                        <input type="text" name="seo[global][organization][legalName]" value="<%= content.seo?.global?.organization?.legalName || 'ФОП Римарчук Анна' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="seo[global][organization][email]" value="<%= content.seo?.global?.organization?.email || '' %>" placeholder="info@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Вулиця</label>
+                        <input type="text" name="seo[global][organization][address][street]" value="<%= content.seo?.global?.organization?.address?.street || 'вул. Соборна, 41' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Місто</label>
+                        <input type="text" name="seo[global][organization][address][city]" value="<%= content.seo?.global?.organization?.address?.city || 'Вінниця' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Поштовий індекс</label>
+                        <input type="text" name="seo[global][organization][address][postalCode]" value="<%= content.seo?.global?.organization?.address?.postalCode || '21000' %>">
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Широта (Latitude)</label>
+                            <input type="text" name="seo[global][organization][geo][latitude]" value="<%= content.seo?.global?.organization?.geo?.latitude || '49.2331' %>">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Довгота (Longitude)</label>
+                            <input type="text" name="seo[global][organization][geo][longitude]" value="<%= content.seo?.global?.organization?.geo?.longitude || '28.4682' %>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ціновий діапазон</label>
+                        <select name="seo[global][organization][priceRange]">
+                            <option value="$" <%= content.seo?.global?.organization?.priceRange === '$' ? 'selected' : '' %>>$ (Бюджетний)</option>
+                            <option value="$$" <%= content.seo?.global?.organization?.priceRange === '$$' || !content.seo?.global?.organization?.priceRange ? 'selected' : '' %>>$$ (Середній)</option>
+                            <option value="$$$" <%= content.seo?.global?.organization?.priceRange === '$$$' ? 'selected' : '' %>>$$$ (Преміум)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2 class="section-header">🏠 Головна сторінка</h2>
+                    
+                    <div class="form-group">
+                        <label>Meta Title (до 60 символів)</label>
+                        <input type="text" name="seo[pages][home][title]" value="<%= content.seo?.pages?.home?.title || '' %>" maxlength="70" placeholder="Лазерна епіляція Вінниця | Rymarchuk Studio">
+                        <small style="color: #888;">Залиште порожнім для автогенерації</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Description (до 160 символів)</label>
+                        <textarea name="seo[pages][home][description]" rows="3" maxlength="170" placeholder="Професійна лазерна епіляція та шугаринг у Вінниці..."><%= content.seo?.pages?.home?.description || '' %></textarea>
+                        <small style="color: #888;">Залиште порожнім для автогенерації</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Keywords (через кому)</label>
+                        <input type="text" name="seo[pages][home][keywords]" value="<%= content.seo?.pages?.home?.keywords || '' %>" placeholder="лазерна епіляція вінниця, шугаринг">
+                    </div>
+                    <div class="form-group">
+                        <label>Canonical URL</label>
+                        <input type="text" name="seo[pages][home][canonical]" value="<%= content.seo?.pages?.home?.canonical || '/' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>OG Image (URL зображення для соцмереж)</label>
+                        <input type="text" name="seo[pages][home][ogImage]" value="<%= content.seo?.pages?.home?.ogImage || '/master_new.jpg' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Robots</label>
+                        <select name="seo[pages][home][robots]">
+                            <option value="index, follow" <%= content.seo?.pages?.home?.robots === 'index, follow' || !content.seo?.pages?.home?.robots ? 'selected' : '' %>>index, follow (Індексувати)</option>
+                            <option value="noindex, follow" <%= content.seo?.pages?.home?.robots === 'noindex, follow' ? 'selected' : '' %>>noindex, follow (Не індексувати)</option>
+                            <option value="index, nofollow" <%= content.seo?.pages?.home?.robots === 'index, nofollow' ? 'selected' : '' %>>index, nofollow</option>
+                            <option value="noindex, nofollow" <%= content.seo?.pages?.home?.robots === 'noindex, nofollow' ? 'selected' : '' %>>noindex, nofollow</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2 class="section-header">💰 Сторінка Прайсу</h2>
+                    
+                    <div class="form-group">
+                        <label>Meta Title</label>
+                        <input type="text" name="seo[pages][price][title]" value="<%= content.seo?.pages?.price?.title || '' %>" maxlength="70" placeholder="Ціни на лазерну епіляцію | Rymarchuk Studio">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Description</label>
+                        <textarea name="seo[pages][price][description]" rows="3" maxlength="170" placeholder="Актуальний прайс-лист на послуги..."><%= content.seo?.pages?.price?.description || '' %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Keywords</label>
+                        <input type="text" name="seo[pages][price][keywords]" value="<%= content.seo?.pages?.price?.keywords || '' %>" placeholder="ціни лазерна епіляція, прайс">
+                    </div>
+                    <div class="form-group">
+                        <label>Canonical URL</label>
+                        <input type="text" name="seo[pages][price][canonical]" value="<%= content.seo?.pages?.price?.canonical || '/price' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>OG Image</label>
+                        <input type="text" name="seo[pages][price][ogImage]" value="<%= content.seo?.pages?.price?.ogImage || '/master_new.jpg' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Robots</label>
+                        <select name="seo[pages][price][robots]">
+                            <option value="index, follow" <%= content.seo?.pages?.price?.robots === 'index, follow' || !content.seo?.pages?.price?.robots ? 'selected' : '' %>>index, follow</option>
+                            <option value="noindex, follow" <%= content.seo?.pages?.price?.robots === 'noindex, follow' ? 'selected' : '' %>>noindex, follow</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2 class="section-header">📸 Сторінка Результатів</h2>
+                    
+                    <div class="form-group">
+                        <label>Meta Title</label>
+                        <input type="text" name="seo[pages][results][title]" value="<%= content.seo?.pages?.results?.title || '' %>" maxlength="70" placeholder="Результати До/Після | Rymarchuk Studio">
+                    </div>
+                    <div class="form-group">
+                        <label>Meta Description</label>
+                        <textarea name="seo[pages][results][description]" rows="3" maxlength="170" placeholder="Фото результатів лазерної епіляції..."><%= content.seo?.pages?.results?.description || '' %></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Keywords</label>
+                        <input type="text" name="seo[pages][results][keywords]" value="<%= content.seo?.pages?.results?.keywords || '' %>" placeholder="результати лазерної епіляції, фото до після">
+                    </div>
+                    <div class="form-group">
+                        <label>Canonical URL</label>
+                        <input type="text" name="seo[pages][results][canonical]" value="<%= content.seo?.pages?.results?.canonical || '/results' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>OG Image</label>
+                        <input type="text" name="seo[pages][results][ogImage]" value="<%= content.seo?.pages?.results?.ogImage || '/work_1.jpg' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Robots</label>
+                        <select name="seo[pages][results][robots]">
+                            <option value="index, follow" <%= content.seo?.pages?.results?.robots === 'index, follow' || !content.seo?.pages?.results?.robots ? 'selected' : '' %>>index, follow</option>
+                            <option value="noindex, follow" <%= content.seo?.pages?.results?.robots === 'noindex, follow' ? 'selected' : '' %>>noindex, follow</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin-section" style="background: #f0f7ff; border: 1px solid #bee3f8;">
+                    <h2 class="section-header" style="color: #2b6cb0;">📋 Технічні файли (автогенерація)</h2>
+                    <p style="color: #4a5568; margin-bottom: 15px;">Ці файли генеруються автоматично на основі ваших налаштувань:</p>
+                    <ul style="color: #4a5568; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px;">
+                            <strong>✅ sitemap.xml</strong> — <a href="/sitemap.xml" target="_blank" style="color: #3182ce;">Переглянути</a>
+                            <br><small>Динамічна карта сайту для пошукових систем</small>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <strong>✅ robots.txt</strong> — <a href="/robots.txt" target="_blank" style="color: #3182ce;">Переглянути</a>
+                            <br><small>Інструкції для пошукових роботів</small>
+                        </li>
+                        <li>
+                            <strong>✅ Schema.org (JSON-LD)</strong>
+                            <br><small>Структуровані дані вбудовані в кожну сторінку</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div id="appointments" class="tab-content active">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>База Клієнтів (Записи)</h2>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div id="pollingStatus" style="font-size: 12px; color: #666;">Очікування...</div>
+                        <button onclick="testSound()"
+                            style="padding: 5px 10px; font-size: 12px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 4px;">
+                            <i class="fas fa-volume-up"></i> Тест звуку
+                        </button>
+                        <script>
+                            // Web Audio beep function
+                            function playBeep() {
+                                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                                const oscillator = ctx.createOscillator();
+                                const gainNode = ctx.createGain();
+                                oscillator.type = 'sine';
+                                oscillator.frequency.setValueAtTime(440, ctx.currentTime); // A4 note
+                                oscillator.connect(gainNode);
+                                gainNode.connect(ctx.destination);
+                                gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                                oscillator.start();
+                                oscillator.stop(ctx.currentTime + 0.2);
+                            }
+
+                            // Test sound button handler
+                            function testSound() {
+                                playBeep();
+                            }
+
+                            let lastCount = 0;
+                            function pollAppointments() {
+                                fetch('/api/appointments/count')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const count = data.count;
+                                        document.getElementById('pollingStatus').innerText = `Записів: ${count}`;
+                                        if (lastCount && count > lastCount) {
+                                            // New appointment added
+                                            playBeep();
+                                            // Optionally refresh the appointments list
+                                            fetch('/api/appointments')
+                                                .then(r => r.json())
+                                                .then(apps => {
+                                                    const tbody = document.querySelector('#appointments table tbody');
+                                                    if (tbody) {
+                                                        tbody.innerHTML = '';
+                                                        apps.forEach(app => {
+                                                            const tr = document.createElement('tr');
+                                                            tr.id = `appointment-row-${app.id}`;
+                                                            tr.innerHTML = `
+                                          <td style="padding: 12px;">${app.date}</td>
+                                          <td style="padding: 12px; font-weight: bold;">${app.name}</td>
+                                          <td style="padding: 12px;"><a href="tel:${app.phone}">${app.phone}</a></td>
+                                          <td style="padding: 12px;">${app.service}</td>
+                                          <td style="padding: 12px;"><span class="status-badge ${app.status}" style="padding: 4px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-size: 0.9em;">${app.status === 'new' ? 'Новий' : app.status}</span></td>
+                                          <td style="padding: 12px;"><button class="btn-icon" title="Видалити" onclick="deleteAppointment('${app.id}')" style="color: #ff4444;"><i class="fas fa-trash"></i></button></td>
+                                        `;
+                                                            tbody.appendChild(tr);
+                                                        });
+                                                    }
+                                                });
+                                        }
+                                        lastCount = count;
+                                    })
+                                    .catch(err => console.error('Polling error', err));
+                            }
+                            // Initial poll and then every 5 seconds
+                            pollAppointments();
+                            setInterval(pollAppointments, 5000);
+                        </script>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="admin-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr style="background: #eee; text-align: left;">
+                                <th style="padding: 12px;">Дата</th>
+                                <th style="padding: 12px;">Ім'я</th>
+                                <th style="padding: 12px;">Телефон</th>
+                                <th style="padding: 12px;">Послуга</th>
+                                <th style="padding: 12px;">Статус</th>
+                                <th style="padding: 12px;">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (appointments && appointments.length> 0) { %>
+                                <% appointments.forEach(function(app) { %>
+                                    <tr id="appointment-row-<%= app.id %>" style="border-bottom: 1px solid #eee;">
+                                        <td style="padding: 12px;">
+                                            <%= app.date %>
+                                        </td>
+                                        <td style="padding: 12px; font-weight: bold;">
+                                            <%= app.name %>
+                                        </td>
+                                        <td style="padding: 12px;"><a href="tel:<%= app.phone %>">
+                                                <%= app.phone %>
+                                            </a></td>
+                                        <td style="padding: 12px;">
+                                            <%= app.service %>
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <span class="status-badge <%= app.status %>"
+                                                style="padding: 4px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-size: 0.9em;">
+                                                <%= app.status==='new' ? 'Новий' : app.status %>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <button class="btn-icon" title="Видалити"
+                                                onclick="deleteAppointment('<%= app.id %>')" style="color: #ff4444;"><i
+                                                    class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="6" style="padding: 20px; text-align: center; color: #666;">
+                                                    Поки що немає записів</td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- End of Appointments Tab -->
+
+            <!-- Booking Tab -->
+            <div id="booking" class="tab-content">
+                <div class="section-header">
+                    <h3>Налаштування вікна запису</h3>
+                </div>
+                <div class="form-group">
+                    <label>Заголовок (Title)</label>
+                    <input type="text" name="booking[title]" value="<%= content.booking.title %>">
+                </div>
+                <div class="form-group">
+                    <label>Підзаголовок (Subtitle)</label>
+                    <input type="text" name="booking[subtitle]" value="<%= content.booking.subtitle %>">
+                </div>
+                <div class="form-group">
+                    <label>Примітка (Note)</label>
+                    <input type="text" name="booking[note]" value="<%= content.booking.note %>">
+                </div>
+
+            </div>
+
+            <!-- Prices Tab -->
+            <div id="prices" class="tab-content">
+                <div class="section-header">
+                    <h3>Редагування Прайс-листа</h3>
+                </div>
+                <div id="pricesContainer">
+                    <% if (content.prices) { %>
+                        <% content.prices.forEach(function(category, catIndex) { %>
+                            <div class="admin-section price-category-card" id="cat-<%= catIndex %>">
+                                <div class="form-group"
+                                    style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="flex-grow: 1; margin-right: 10px;">
+                                        <label>Назва категорії</label>
+                                        <input type="text" name="prices[<%= catIndex %>][category]"
+                                            value="<%= category.category %>">
+                                    </div>
+                                    <button type="button" class="delete-btn"
+                                        onclick="this.closest('.price-category-card').remove()"
+                                        style="margin-top: 24px; margin-left: 10px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <h4>Послуги в категорії</h4>
+                                <div class="price-items-list">
+                                    <% category.items.forEach(function(item, itemIndex) { %>
+                                        <div class="price-item-row"
+                                            style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                            <input type="text"
+                                                name="prices[<%= catIndex %>][items][<%= itemIndex %>][name]"
+                                                value="<%= item.name %>" placeholder="Назва послуги"
+                                                style="flex-grow: 2;">
+                                            <input type="text"
+                                                name="prices[<%= catIndex %>][items][<%= itemIndex %>][price]"
+                                                value="<%= item.price %>" placeholder="Ціна" style="flex-grow: 1;">
+                                            <button type="button" class="delete-btn"
+                                                onclick="this.closest('.price-item-row').remove()"
+                                                style="width: auto; padding: 0 10px;">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <% }); %>
+                                </div>
+                                <button type="button" class="add-btn small"
+                                    onclick="addPriceItem(this, <%= catIndex %>)">
+                                    <i class="fas fa-plus"></i> Додати послугу
+                                </button>
+                            </div>
+                            <% }); %>
+                                <% } %>
+                </div>
+                <button type="button" class="add-btn" onclick="addPriceCategory()">
+                    <i class="fas fa-plus"></i> Додати нову категорію
+                </button>
+            </div>
+
+            <!-- Test Drive Tab -->
+            <div id="testdrive" class="tab-content">
+                <div class="section-header">
+                    <h3>Налаштування Тест-драйву</h3>
+                </div>
+                <div class="form-group">
+                    <label>Заголовок (Title)</label>
+                    <input type="text" name="testDrive[title]" value="<%= content.testDrive.title %>">
+                </div>
+                <div class="form-group">
+                    <label>Текст (Text)</label>
+                    <textarea name="testDrive[text]" rows="3"><%= content.testDrive.text %></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Примітка (Note)</label>
+                    <input type="text" name="testDrive[note]" value="<%= content.testDrive.note %>">
+                </div>
+            </div>
+
+            <!-- Blog Tab -->
+            <div id="blog" class="tab-content">
+                <div class="admin-section">
+                    <h2 class="section-header">📝 Керування блогом</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Додавайте та редагуйте статті блогу</p>
+                    
+                    <div class="form-group">
+                        <label>Заголовок секції блогу</label>
+                        <input type="text" name="blog[title]" value="<%= content.blog?.title || 'Блог' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Підзаголовок</label>
+                        <input type="text" name="blog[subtitle]" value="<%= content.blog?.subtitle || 'Корисні статті про догляд за шкірою' %>">
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2 class="section-header">Статті блогу</h2>
+                    <div id="blogPostsList">
+                        <% if (content.blog?.posts && content.blog.posts.length > 0) { %>
+                            <% content.blog.posts.forEach(function(post, index) { %>
+                            <div class="blog-post-card admin-card" id="blog-post-<%= index %>">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                                    <div style="flex: 1;">
+                                        <span class="post-category-badge" style="background: var(--color-accent); color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; text-transform: uppercase;"><%= post.category %></span>
+                                        <h4 style="margin-top: 10px; font-size: 18px;"><%= post.title %></h4>
+                                        <small style="color: #888;"><%= post.date %></small>
+                                    </div>
+                                    <button type="button" class="delete-btn" onclick="this.closest('.blog-post-card').remove()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <input type="hidden" name="blog[posts][<%= index %>][id]" value="<%= post.id %>">
+                                
+                                <div class="form-group">
+                                    <label>ID статті (URL slug)</label>
+                                    <input type="text" name="blog[posts][<%= index %>][id]" value="<%= post.id %>" placeholder="my-article-slug">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Заголовок</label>
+                                    <input type="text" name="blog[posts][<%= index %>][title]" value="<%= post.title %>">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Короткий опис (excerpt)</label>
+                                    <textarea name="blog[posts][<%= index %>][excerpt]" rows="2"><%= post.excerpt %></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Зображення</label>
+                                    <input type="hidden" name="blog[posts][<%= index %>][image]" class="blog-image-input" value="<%= post.image %>">
+                                    <div class="image-preview-container" style="width: 200px; height: 120px;">
+                                        <img src="/<%= post.image %>" class="image-preview show blog-preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div class="upload-btn-wrapper">
+                                        <button class="btn-upload" type="button">Змінити</button>
+                                        <input type="file" onchange="uploadImage(this, this.closest('.form-group').querySelector('.blog-image-input'), this.closest('.form-group').querySelector('.blog-preview'))">
+                                    </div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                    <div class="form-group">
+                                        <label>Категорія</label>
+                                        <input type="text" name="blog[posts][<%= index %>][category]" value="<%= post.category %>" placeholder="Поради">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Дата</label>
+                                        <input type="date" name="blog[posts][<%= index %>][date]" value="<%= post.date %>">
+                                    </div>
+                                    </div>
+                                
+                                <div class="form-group">
+                                    <label>Контент статті (HTML)</label>
+                                    <textarea name="blog[posts][<%= index %>][content]" rows="10" style="font-family: monospace; font-size: 13px;"><%= post.content %></textarea>
+                                    <small style="color: #888;">Підтримується HTML: &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;blockquote&gt;</small>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p style="color: #888; text-align: center; padding: 40px;">Статей поки немає</p>
+                        <% } %>
+                    </div>
+                    
+                    <button type="button" class="add-btn" onclick="addBlogPost()">
+                        <i class="fas fa-plus"></i> Додати статтю
+                    </button>
+                </div>
+                
+                <div class="admin-section" style="background: #f0fff4; border: 1px solid #9ae6b4;">
+                    <h3 style="color: #276749; margin-bottom: 10px;">💡 Підказка</h3>
+                    <p style="color: #2f855a; font-size: 14px;">
+                        Після збереження статті будуть доступні за адресою: <br>
+                        <code style="background: #c6f6d5; padding: 2px 6px; border-radius: 4px;">/blog/[id-статті]</code>
+                    </p>
+                </div>
+            </div>
+
+            <button type="submit" class="save-btn">
+                <i class="fas fa-save"></i> Зберегти зміни
+            </button>
+        </form>
+    </div>
+
+    <div id="successMessage" class="success-message">
+        <i class="fas fa-check-circle"></i> Зміни успішно збережено!
+    </div>
+
+    <!-- Crop Modal -->
+    <div id="cropModal" class="crop-modal">
+        <div class="crop-container">
+            <div class="crop-image-wrapper">
+                <img id="cropImage" src="">
+            </div>
+            <div class="crop-actions">
+                <button type="button" class="save-btn" style="position: static; margin: 0;"
+                    onclick="saveCrop()">Зберегти</button>
+                <button type="button" class="delete-btn" onclick="closeCropModal()"
+                    style="position: static; width: auto; padding: 0 20px; border-radius: 50px; height: auto;">Скасувати</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="crop-modal" id="deleteModal" style="display: none; background: rgba(0,0,0,0.5); z-index: 3000;">
+        <div class="crop-container" style="max-width: 400px; padding: 30px; text-align: center;">
+            <div style="font-size: 40px; color: #ff4444; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h3 style="margin-bottom: 10px; font-family: var(--font-heading);">Видалити запис?</h3>
+            <p style="color: #666; margin-bottom: 25px;">Цю дію неможливо скасувати.</p>
+            <div class="crop-actions" style="justify-content: center;">
+                <button class="btn-upload" id="confirmDeleteBtn"
+                    style="background: #ff4444; color: white; border: none;">Видалити</button>
+                <button class="btn-upload" onclick="closeDeleteModal()"
+                    style="background: #eee; color: #333; border: none;">Скасувати</button>
+            </div>
+        </div>
+    </div>
+    <!-- Debug Console -->
+    <div id="debugConsole"
+        style="position: fixed; bottom: 0; left: 0; width: 100%; height: 200px; background: #000; color: #0f0; font-family: monospace; font-size: 14px; padding: 15px; overflow-y: auto; z-index: 10000; border-top: 4px solid #f00; display: none;">
+        <div><strong>Debug Console (System Status)</strong> <button
+                onclick="document.getElementById('debugConsole').style.display='none'"
+                style="float: right; padding: 5px 10px; background: #333; color: white; border: 1px solid #666;">Close</button>
+        </div>
+        <div id="debugLogContent"></div>
+    </div>
+    <button onclick="document.getElementById('debugConsole').style.display='block'"
+        style="position: fixed; bottom: 10px; left: 10px; z-index: 9998; font-size: 10px; opacity: 0.5;">Debug</button>
+
+    <script>
+        function logDebug(msg) {
+            const log = document.getElementById('debugLogContent');
+            if (log) {
+                const entry = document.createElement('div');
+                entry.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                log.prepend(entry);
+            }
+            // console.log(msg); // Keep browser console logging as well
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            logDebug(`Opened tab: ${tabName}`);
+        }
+
+        let cropper;
+        let currentInput;
+        let currentHiddenInputId;
+        let currentPreviewId;
+
+        function addPriceItem(btn, catIndex) {
+            const container = btn.previousElementSibling;
+            const itemIndex = container.children.length;
+            const div = document.createElement('div');
+            div.className = 'price-item-row';
+            div.style = 'display: flex; gap: 10px; margin-bottom: 10px;';
+            div.innerHTML = `
+                <input type="text" name="prices[${catIndex}][items][${itemIndex}][name]" placeholder="Назва послуги" style="flex-grow: 2;">
+                <input type="text" name="prices[${catIndex}][items][${itemIndex}][price]" placeholder="Ціна" style="flex-grow: 1;">
+                <button type="button" class="delete-btn" onclick="this.closest('.price-item-row').remove()" style="width: auto; padding: 0 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addPriceCategory() {
+            const container = document.getElementById('pricesContainer');
+            const catIndex = container.children.length;
+            const div = document.createElement('div');
+            div.className = 'admin-section price-category-card';
+            div.id = `cat-${catIndex}`;
+            div.innerHTML = `
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex-grow: 1; margin-right: 10px;">
+                        <label>Назва категорії</label>
+                        <input type="text" name="prices[${catIndex}][category]" placeholder="Назва категорії">
+                    </div>
+                    <button type="button" class="delete-btn" onclick="this.closest('.price-category-card').remove()" style="margin-top: 24px; margin-left: 10px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <h4>Послуги в категорії</h4>
+                <div class="price-items-list"></div>
+                <button type="button" class="add-btn small" onclick="addPriceItem(this, ${catIndex})">
+                    <i class="fas fa-plus"></i> Додати послугу
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function uploadImage(input, hiddenInputId, previewId) {
+            if (input.files && input.files[0]) {
+                currentInput = input;
+                currentHiddenInputId = hiddenInputId;
+                currentPreviewId = previewId;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('cropImage').src = e.target.result;
+                    document.getElementById('cropModal').style.display = 'flex';
+
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+
+                    const image = document.getElementById('cropImage');
+                    cropper = new Cropper(image, {
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        responsive: true,
+                    });
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function closeCropModal() {
+            document.getElementById('cropModal').style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            if (currentInput) {
+                currentInput.value = ''; // Clear input
+            }
+        }
+
+        function saveCrop() {
+            if (!cropper) return;
+
+            cropper.getCroppedCanvas().toBlob((blob) => {
+                const formData = new FormData();
+                formData.append('image', blob, 'cropped.jpg');
+
+                fetch('/admin/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update hidden input
+                            if (typeof currentHiddenInputId === 'string') {
+                                document.getElementById(currentHiddenInputId).value = data.filepath;
+                            } else {
+                                currentHiddenInputId.value = data.filepath;
+                            }
+
+                            // Update preview
+                            if (typeof currentPreviewId === 'string') {
+                                const preview = document.getElementById(currentPreviewId);
+                                preview.src = '/' + data.filepath;
+                                preview.classList.add('show');
+                            } else {
+                                currentPreviewId.src = '/' + data.filepath;
+                                currentPreviewId.classList.add('show');
+                            }
+
+                            closeCropModal();
+                        } else {
+                            alert('Помилка завантаження');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Помилка з\'єднання');
+                    });
+            }, 'image/jpeg', 0.9);
+        }
+
+        function addPortfolioItem() {
+            const list = document.getElementById('portfolioList');
+            const index = list.children.length;
+            const div = document.createElement('div');
+            div.className = 'portfolio-item-card';
+            div.innerHTML = `
+                <button type="button" class="delete-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                <div class="form-group">
+                    <label>Фото</label>
+                    <input type="hidden" name="portfolio[${index}][image]" class="portfolio-image-input" value="">
+                    <div class="image-preview-container">
+                        <img src="" class="image-preview portfolio-preview">
+                    </div>
+                    <div class="upload-btn-wrapper">
+                        <button class="btn-upload" type="button">Завантажити</button>
+                        <input type="file" onchange="uploadImage(this, this.parentElement.previousElementSibling.previousElementSibling, this.parentElement.previousElementSibling.querySelector('img'))">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Підпис</label>
+                    <input type="text" name="portfolio[${index}][title]" id="portfolioTitle${index}" value="Нова робота">
+                </div>
+            `;
+            list.appendChild(div);
+        }
+
+        function addServiceItem() {
+            const list = document.getElementById('servicesList');
+            const index = list.children.length;
+            const div = document.createElement('div');
+            div.className = 'portfolio-item-card service-item-card';
+            div.innerHTML = `
+                <button type="button" class="delete-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                <div class="form-group">
+                    <label>Фото</label>
+                    <input type="hidden" name="services[${index}][image]" class="service-image-input" value="">
+                    <div class="image-preview-container">
+                        <img src="" class="image-preview service-preview">
+                    </div>
+                    <div class="upload-btn-wrapper">
+                        <button class="btn-upload" type="button">Завантажити</button>
+                        <input type="file" onchange="uploadImage(this, this.parentElement.previousElementSibling.previousElementSibling, this.parentElement.previousElementSibling.querySelector('img'))">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Назва</label>
+                    <input type="text" name="services[${index}][title]" id="serviceTitle${index}" value="Нова послуга">
+                </div>
+                <div class="form-group">
+                    <label>Опис</label>
+                    <textarea name="services[${index}][description]" id="serviceDesc${index}"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ціна</label>
+                    <input type="text" name="services[${index}][price]" value="від 0 грн">
+                </div>
+            `;
+            list.appendChild(div);
+        }
+        
+        function addBlogPost() {
+            const list = document.getElementById('blogPostsList');
+            // Remove "no posts" message if exists
+            const emptyMsg = list.querySelector('p');
+            if (emptyMsg) emptyMsg.remove();
+            
+            const index = list.querySelectorAll('.blog-post-card').length;
+            const today = new Date().toISOString().split('T')[0];
+            const slug = 'new-post-' + Date.now();
+            
+            const div = document.createElement('div');
+            div.className = 'blog-post-card admin-card';
+            div.id = 'blog-post-' + index;
+            div.innerHTML = `
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <span class="post-category-badge" style="background: var(--color-accent); color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; text-transform: uppercase;">Нова</span>
+                        <h4 style="margin-top: 10px; font-size: 18px;">Нова стаття</h4>
+                    </div>
+                    <button type="button" class="delete-btn" onclick="this.closest('.blog-post-card').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label>ID статті (URL slug)</label>
+                    <input type="text" name="blog[posts][${index}][id]" value="${slug}" placeholder="my-article-slug">
+                </div>
+                
+                <div class="form-group">
+                    <label>Заголовок</label>
+                    <input type="text" name="blog[posts][${index}][title]" value="Нова стаття" placeholder="Заголовок статті">
+                </div>
+                
+                <div class="form-group">
+                    <label>Короткий опис (excerpt)</label>
+                    <textarea name="blog[posts][${index}][excerpt]" rows="2" placeholder="Короткий опис для картки статті..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Зображення</label>
+                    <input type="hidden" name="blog[posts][${index}][image]" class="blog-image-input" value="service_1.jpg">
+                    <div class="image-preview-container" style="width: 200px; height: 120px;">
+                        <img src="/service_1.jpg" class="image-preview show blog-preview" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="upload-btn-wrapper">
+                        <button class="btn-upload" type="button">Завантажити</button>
+                        <input type="file" onchange="uploadImage(this, this.closest('.form-group').querySelector('.blog-image-input'), this.closest('.form-group').querySelector('.blog-preview'))">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Категорія</label>
+                        <input type="text" name="blog[posts][${index}][category]" value="Поради" placeholder="Поради">
+                    </div>
+                    <div class="form-group">
+                        <label>Дата</label>
+                        <input type="date" name="blog[posts][${index}][date]" value="${today}">
+                    </div>
+                    </div>
+                
+                <div class="form-group">
+                    <label>Контент статті (HTML)</label>
+                    <textarea name="blog[posts][${index}][content]" rows="10" style="font-family: monospace; font-size: 13px;" placeholder="<p>Текст статті...</p>"></textarea>
+                    <small style="color: #888;">Підтримується HTML: &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;blockquote&gt;</small>
+                </div>
+            `;
+            list.appendChild(div);
+            
+            // Scroll to new post
+            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Re-index portfolio items
+            const portfolioInputs = document.querySelectorAll('.portfolio-item-card:not(.service-item-card)');
+            portfolioInputs.forEach((card, index) => {
+                card.querySelector('.portfolio-image-input').name = `portfolio[${index}][image]`;
+                card.querySelector('input[type="text"]').name = `portfolio[${index}][title]`;
+            });
+
+            // Re-index services items
+            const serviceInputs = document.querySelectorAll('.service-item-card');
+            serviceInputs.forEach((card, index) => {
+                card.querySelector('.service-image-input').name = `services[${index}][image]`;
+                card.querySelector('input[name*="[title]"]').name = `services[${index}][title]`;
+                card.querySelector('textarea').name = `services[${index}][description]`;
+                card.querySelector('input[name*="[price]"]').name = `services[${index}][price]`;
+            });
+            
+            // Re-index blog posts
+            const blogPosts = document.querySelectorAll('.blog-post-card');
+            blogPosts.forEach((card, index) => {
+                card.querySelectorAll('input, textarea').forEach(input => {
+                    if (input.name && input.name.includes('blog[posts]')) {
+                        input.name = input.name.replace(/blog\[posts\]\[\d+\]/, `blog[posts][${index}]`);
+                    }
+                });
+            });
+
+            const formData = new FormData(e.target);
+            const data = {};
+
+            // Helper to set nested values
+            for (let [key, value] of formData.entries()) {
+                // Handle array notation: portfolio[0][image]
+                if (key.includes('[')) {
+                    const parts = key.split('[').map(k => k.replace(']', ''));
+                    let current = data;
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        const part = parts[i];
+                        if (!current[part]) current[part] = isNaN(parts[i + 1]) ? {} : [];
+                        current = current[part];
+                    }
+                    current[parts[parts.length - 1]] = value;
+                } else {
+                    data[key] = value;
+                }
+            }
+
+            // Explicitly handle showPromo checkbox because unchecked checkboxes are not included in FormData
+            const showPromoCheckbox = document.querySelector('input[name="hero[showPromo]"]');
+            if (showPromoCheckbox) {
+                if (!data.hero) data.hero = {};
+                data.hero.showPromo = showPromoCheckbox.checked;
+            }
+
+            try {
+                const response = await fetch('/admin/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const msg = document.getElementById('successMessage');
+                    msg.classList.add('show');
+                    setTimeout(() => msg.classList.remove('show'), 3000);
+                } else {
+                    alert('Помилка при збереженні');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Помилка з\'єднання');
+            }
+        });
+
+        // ==========================================
+        // NOTIFICATION & AUTO-UPDATE LOGIC
+        // ==========================================
+
+        let lastAppointmentCount = <%= appointments ?appointments.length: 0 %>;
+
+        function playNotificationSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            const audioContext = new AudioContext();
+
+            // Try to resume if suspended
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.1);
+
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Web Worker for Background Polling
+        let worker;
+        let lastWorkerTick = Date.now();
+
+        try {
+            worker = new Worker('/worker.js');
+            worker.onmessage = function (e) {
+                if (e.data === 'tick') {
+                    lastWorkerTick = Date.now();
+                    logDebug('Worker tick');
+                    checkNewAppointments();
+                }
+            };
+            worker.postMessage('start');
+            logDebug('Worker started');
+        } catch (e) {
+            logDebug('Worker failed: ' + e.message);
+        }
+
+        // Fallback Polling (if worker dies)
+        setInterval(() => {
+            if (Date.now() - lastWorkerTick > 7000) {
+                logDebug('Fallback tick (Worker silent)');
+                checkNewAppointments();
+            }
+        }, 5000);
+
+        // Unlock Audio Context
+        document.addEventListener('click', function () {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                ctx.resume().then(() => {
+                    logDebug('Audio Context Unlocked');
+                });
+            }
+        }, { once: true });
+
+        function checkNewAppointments() {
+            const statusEl = document.getElementById('pollingStatus');
+            const timeStr = new Date().toLocaleTimeString();
+
+            // Fetch appointment count and then update status for debugging
+            fetch('/api/appointments/count?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    // Update status with counts for debugging
+                    if (statusEl) {
+                        statusEl.innerHTML = `Оновлено: ${new Date().toLocaleTimeString()} (S:${data.count} / L:${lastAppointmentCount}) <span style="color: #4CAF50;">●</span>`;
+                    }
+                    logDebug(`Check: Server=${data.count}, Local=${lastAppointmentCount}`);
+
+                    if (data.count !== lastAppointmentCount) {
+                        logDebug('CHANGE DETECTED!');
+
+                        if (data.count > lastAppointmentCount) {
+                            logDebug('New appointment! Playing sound.');
+                            playNotificationSound();
+
+                            const originalTitle = document.title;
+                            document.title = '🔔 НОВИЙ ЗАПИС! | ' + originalTitle;
+                            setTimeout(() => document.title = originalTitle, 5000);
+
+                            const msg = document.getElementById('successMessage');
+                            if (msg) {
+                                msg.innerHTML = '<i class="fas fa-bell"></i> Новий запис клієнта!';
+                                msg.classList.add('show');
+                                setTimeout(() => msg.classList.remove('show'), 5000);
+                            }
+                        }
+
+                        fetch('/api/appointments?t=' + Date.now())
+                            .then(res => res.json())
+                            .then(appointments => {
+                                logDebug(`Table updated. New count: ${appointments.length}`);
+                                updateTable(appointments);
+                                lastAppointmentCount = appointments.length;
+                            });
+                    }
+                })
+                .catch(err => {
+                    logDebug('Error: ' + err.message);
+                    if (statusEl) statusEl.innerHTML = 'Помилка <span style="color: red;">●</span>';
+                });
+        }
+
+
+
+        function playNotificationSound() {
+            // Відтворюємо два короткі сигнали (біпи) за допомогою Web Audio API
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            function beep() {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime); // нота A4
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15); // тривалість 150 мс
+            }
+
+            // Перший біп
+            beep();
+            // Другий біп через 200 мс
+            setTimeout(beep, 200);
+        }
+
+
+        let appointmentToDeleteId = null;
+
+        function deleteAppointment(id) {
+            appointmentToDeleteId = id;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            appointmentToDeleteId = null;
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            if (!appointmentToDeleteId) return;
+
+            const idToDelete = appointmentToDeleteId; // Store for DOM removal
+
+            fetch('/api/appointments/' + idToDelete, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDeleteModal();
+
+                        // 1. Remove from DOM immediately (Instant feedback)
+                        const row = document.getElementById('appointment-row-' + idToDelete);
+                        if (row) {
+                            row.remove();
+                        }
+
+                        // Show success toast
+                        const msg = document.getElementById('successMessage');
+                        msg.innerHTML = '<i class="fas fa-check-circle"></i> Запис видалено!';
+                        msg.classList.add('show');
+                        setTimeout(() => msg.classList.remove('show'), 3000);
+
+                        // 2. Background refresh to stay in sync
+                        fetch('/api/appointments')
+                            .then(res => res.json())
+                            .then(appointments => {
+                                // Only update if we didn't just break the table logic
+                                // Actually, if we removed the row, we might be fine.
+                                // But let's updateTable just in case of other changes
+                                // updateTable(appointments); 
+                                // Optimization: Don't redraw entire table if we just removed one row.
+                                // Just update the count.
+                                lastAppointmentCount = appointments.length;
+                            });
+                    } else {
+                        alert('Помилка видалення');
+                    }
+                })
+                .catch(err => alert('Помилка: ' + err));
+        });
+
+        function updateTable(appointments) {
+            const tbody = document.querySelector('.appointments-table tbody');
+            tbody.innerHTML = ''; // Clear current
+
+            const reversedApps = [...appointments]; // Already sorted by unshift in server
+
+            if (reversedApps.length > 0) {
+                reversedApps.forEach(app => {
+                    const row = `
+                        <tr id="appointment-row-${app.id}" style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px;">${app.date}</td>
+                            <td style="padding: 12px; font-weight: bold;">${app.name}</td>
+                            <td style="padding: 12px;"><a href="tel:${app.phone}">${app.phone}</a></td>
+                            <td style="padding: 12px;">${app.service}</td>
+                            <td style="padding: 12px;">
+                                <span class="status-badge ${app.status}"
+                                    style="padding: 4px 8px; border-radius: 4px; background: #e3f2fd; color: #1976d2; font-size: 0.9em;">
+                                    ${app.status === 'new' ? 'Новий' : app.status}
+                                </span>
+                            </td>
+                            <td style="padding: 12px;">
+                                <button class="btn-delete" title="Видалити" onclick="deleteAppointment('${app.id}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            } else {
+                const noAppointmentsRow = `
+                    <tr id="no-appointments-row">
+                        <td colspan="6" style="padding: 20px; text-align: center; color: #666;">
+                            Поки що немає записів
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', noAppointmentsRow);
+            }
+        }
+    </script>
+</body>
+
+</html>

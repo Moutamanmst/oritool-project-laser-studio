@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title><%= seo.title %></title>
+    <meta name="title" content="<%= seo.title %>">
+    <meta name="description" content="<%= seo.description %>">
+    <% if (seo.keywords) { %>
+    <meta name="keywords" content="<%= seo.keywords %>">
+    <% } %>
+    <meta name="robots" content="<%= seo.robots %>">
+    <meta name="author" content="<%= seo.siteName %>">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= seo.canonical %>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="<%= seo.ogType %>">
+    <meta property="og:url" content="<%= seo.ogUrl %>">
+    <meta property="og:title" content="<%= seo.ogTitle %>">
+    <meta property="og:description" content="<%= seo.ogDescription %>">
+    <meta property="og:image" content="<%= seo.ogImage %>">
+    <meta property="og:site_name" content="<%= seo.siteName %>">
+    <meta property="og:locale" content="<%= seo.locale %>">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= seo.ogTitle %>">
+    <meta name="twitter:description" content="<%= seo.ogDescription %>">
+    <meta name="twitter:image" content="<%= seo.ogImage %>">
+    
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#8B7A73">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <% schemas.forEach(function(schema) { %>
+    <script type="application/ld+json"><%- JSON.stringify(schema) %></script>
+    <% }); %>
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css?v=<%= Date.now() %>">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container">
+            <nav class="nav" role="navigation" aria-label="Головна навігація">
+                <a href="/" class="logo" aria-label="<%= seo.siteName %> - На головну">
+                    <span class="logo-text">Laser Studio</span>
+                    <span class="logo-name">Rymarchuk</span>
+                </a>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="/" class="nav-link">Головна</a></li>
+                    <li><a href="/price" class="nav-link">Послуги</a></li>
+                    <li><a href="/results" class="nav-link">Результати</a></li>
+                    <li><a href="/blog" class="nav-link active" aria-current="page">Блог</a></li>
+                    <li><a href="/#contacts" class="nav-link">Контакти</a></li>
+                    <li class="mobile-only"><a href="tel:<%= content.site.phoneLink %>" class="nav-link">📞 Зателефонувати</a></li>
+                </ul>
+                <button class="btn btn-primary" onclick="window.location.href='/#bookingModal'" aria-label="Записатись">ЗАПИСАТИСЬ</button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Відкрити меню" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Blog Section -->
+    <main class="section blog-section" style="padding-top: 120px;" role="main">
+        <div class="container">
+            <header class="section-header">
+                <h1 class="section-title"><%= content.blog?.title || 'Блог' %></h1>
+                <p class="section-subtitle"><%= content.blog?.subtitle || 'Корисні статті' %></p>
+            </header>
+
+            <div class="blog-grid">
+                <% if (content.blog?.posts && content.blog.posts.length > 0) { %>
+                    <% content.blog.posts.forEach(function(post, index) { %>
+                    <article class="blog-card">
+                        <a href="/blog/<%= post.id %>" class="blog-card-link">
+                            <div class="blog-card-image">
+                                <img src="/<%= post.image %>?v=<%= Date.now() %>" 
+                                     alt="<%= post.title %>" 
+                                     loading="<%= index < 3 ? 'eager' : 'lazy' %>"
+                                     width="400" height="250">
+                                <span class="blog-category"><%= post.category %></span>
+                            </div>
+                            <div class="blog-card-content">
+                                <div class="blog-meta">
+                                    <time datetime="<%= post.date %>">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <%= new Date(post.date).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                    </time>
+                                </div>
+                                <h2 class="blog-card-title"><%= post.title %></h2>
+                                <p class="blog-card-excerpt"><%= post.excerpt %></p>
+                                <span class="blog-read-more">Читати далі <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    </article>
+                    <% }); %>
+                <% } else { %>
+                    <div class="blog-empty">
+                        <i class="fas fa-newspaper"></i>
+                        <p>Статті скоро з'являться!</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacts" class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Rymarchuk</h3>
+                    <p class="footer-text"><%- content.site.footerText %></p>
+                </div>
+                <div class="footer-column">
+                    <h3>Контакти</h3>
+                    <address class="footer-contact">
+                        <p>📍 м. Вінниця, вул. Соборна, 41</p>
+                        <p>📞 <a href="tel:<%= content.site.phoneLink %>" style="color: inherit;"><%= content.site.phone %></a></p>
+                    </address>
+                </div>
+                <div class="footer-column">
+                    <h3>Соцмережі</h3>
+                    <div class="social-links">
+                        <a href="<%= content.site.instagram %>" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="viber://add?number=<%= content.site.phoneLink.replace('+', '') %>" class="social-link" aria-label="Viber">
+                            <i class="fab fa-viber"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Laser Studio. Всі права захищено.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Contact Widget -->
+    <div class="floating-widget" role="complementary" aria-label="Швидкі контакти">
+        <a href="tel:<%= content.site.phoneLink %>" class="widget-btn phone-btn" aria-label="Зателефонувати">
+            <i class="fas fa-phone-alt"></i>
+        </a>
+        <a href="<%= content.site.instagram %>" target="_blank" rel="noopener noreferrer" class="widget-btn insta-btn" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
+
+    <script src="/script.js"></script>
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                this.setAttribute('aria-expanded', navMenu.classList.contains('active'));
+                document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+            });
+            
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenuBtn.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід в Адмін-панель</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--color-bg-warm);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-title {
+            font-family: var(--font-heading);
+            font-size: 32px;
+            margin-bottom: 24px;
+            color: var(--color-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            background-color: var(--color-text-dark);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <h1 class="login-title">Вхід</h1>
+        <% if (typeof error !=='undefined' ) { %>
+            <p class="error-message">
+                <%= error %>
+            </p>
+            <% } %>
+                <form action="/admin/login" method="POST">
+                    <div class="form-group">
+                        <label for="password">Пароль</label>
+                        <input type="password" id="password" name="password" required placeholder="Введіть пароль">
+                    </div>
+                    <button type="submit" class="btn-login">Увійти</button>
+                </form>
+    </div>
+</body>
+
+</html>

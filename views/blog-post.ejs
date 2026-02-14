@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title><%= seo.title %></title>
+    <meta name="title" content="<%= seo.title %>">
+    <meta name="description" content="<%= seo.description %>">
+    <% if (seo.keywords) { %>
+    <meta name="keywords" content="<%= seo.keywords %>">
+    <% } %>
+    <meta name="robots" content="<%= seo.robots %>">
+    <meta name="author" content="Анна Римарчук">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= seo.canonical %>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="<%= seo.ogUrl %>">
+    <meta property="og:title" content="<%= seo.ogTitle %>">
+    <meta property="og:description" content="<%= seo.ogDescription %>">
+    <meta property="og:image" content="<%= seo.ogImage %>">
+    <meta property="og:site_name" content="<%= seo.siteName %>">
+    <meta property="og:locale" content="<%= seo.locale %>">
+    <meta property="article:published_time" content="<%= post.date %>">
+    <meta property="article:author" content="Анна Римарчук">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= seo.ogTitle %>">
+    <meta name="twitter:description" content="<%= seo.ogDescription %>">
+    <meta name="twitter:image" content="<%= seo.ogImage %>">
+    
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#8B7A73">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <% schemas.forEach(function(schema) { %>
+    <script type="application/ld+json"><%- JSON.stringify(schema) %></script>
+    <% }); %>
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/style.css?v=<%= Date.now() %>">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container">
+            <nav class="nav" role="navigation" aria-label="Головна навігація">
+                <a href="/" class="logo" aria-label="<%= seo.siteName %> - На головну">
+                    <span class="logo-text">Laser Studio</span>
+                    <span class="logo-name">Rymarchuk</span>
+                </a>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="/" class="nav-link">Головна</a></li>
+                    <li><a href="/price" class="nav-link">Послуги</a></li>
+                    <li><a href="/results" class="nav-link">Результати</a></li>
+                    <li><a href="/blog" class="nav-link active">Блог</a></li>
+                    <li><a href="/#contacts" class="nav-link">Контакти</a></li>
+                    <li class="mobile-only"><a href="tel:<%= content.site.phoneLink %>" class="nav-link">📞 Зателефонувати</a></li>
+                </ul>
+                <button class="btn btn-primary" onclick="document.getElementById('bookingModal').classList.add('active'); document.body.style.overflow = 'hidden';" aria-label="Записатись">ЗАПИСАТИСЬ</button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Відкрити меню" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Blog Post -->
+    <main class="section blog-post-section" style="padding-top: 100px;" role="main">
+        <article class="blog-post-container">
+            <!-- Back Button -->
+            <nav class="blog-back-nav container" aria-label="Навігація">
+                <a href="/blog" class="back-link"><i class="fas fa-arrow-left"></i> Назад до блогу</a>
+            </nav>
+
+            <!-- Hero Image -->
+            <div class="blog-post-hero">
+                <img src="/<%= post.image %>?v=<%= Date.now() %>" alt="<%= post.title %>" class="hero-bg-image">
+                <div class="blog-post-hero-overlay">
+                    <span class="blog-post-category"><%= post.category %></span>
+                    <h1 class="blog-post-title"><%= post.title %></h1>
+                    <div class="blog-post-meta">
+                        <span class="blog-post-author">
+                            <i class="fas fa-user"></i> Анна Римарчук
+                        </span>
+                        <time datetime="<%= post.date %>">
+                            <i class="far fa-calendar-alt"></i>
+                            <%= new Date(post.date).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                        </time>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="container">
+                <div class="blog-post-content">
+                    <%- post.content %>
+                </div>
+
+                <!-- Share Buttons -->
+                <div class="blog-post-share">
+                    <span>Поділитися:</span>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(seo.canonical) %>" 
+                       target="_blank" rel="noopener noreferrer" class="share-btn facebook" aria-label="Поділитися у Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://t.me/share/url?url=<%= encodeURIComponent(seo.canonical) %>&text=<%= encodeURIComponent(post.title) %>" 
+                       target="_blank" rel="noopener noreferrer" class="share-btn telegram" aria-label="Поділитися у Telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                    <a href="viber://forward?text=<%= encodeURIComponent(post.title + ' ' + seo.canonical) %>" 
+                       class="share-btn viber" aria-label="Поділитися у Viber">
+                        <i class="fab fa-viber"></i>
+                    </a>
+                </div>
+
+                <!-- CTA -->
+                <div class="blog-post-cta">
+                    <h3>Готові спробувати?</h3>
+                    <p>Запишіться на безкоштовну консультацію та отримайте індивідуальні рекомендації</p>
+                    <button class="btn btn-accent" onclick="document.getElementById('bookingModal').classList.add('active'); document.body.style.overflow = 'hidden';">ЗАПИСАТИСЬ НА КОНСУЛЬТАЦІЮ</button>
+                </div>
+
+            </div>
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacts" class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>Rymarchuk</h3>
+                    <p class="footer-text"><%- content.site.footerText %></p>
+                </div>
+                <div class="footer-column">
+                    <h3>Контакти</h3>
+                    <address class="footer-contact">
+                        <p>📍 м. Вінниця, вул. Соборна, 41</p>
+                        <p>📞 <a href="tel:<%= content.site.phoneLink %>" style="color: inherit;"><%= content.site.phone %></a></p>
+                    </address>
+                </div>
+                <div class="footer-column">
+                    <h3>Соцмережі</h3>
+                    <div class="social-links">
+                        <a href="<%= content.site.instagram %>" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="viber://add?number=<%= content.site.phoneLink.replace('+', '') %>" class="social-link" aria-label="Viber">
+                            <i class="fab fa-viber"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Laser Studio. Всі права захищено.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal" role="dialog" aria-labelledby="booking-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-modal" onclick="document.getElementById('bookingModal').classList.remove('active'); document.body.style.overflow = '';" aria-label="Закрити вікно">&times;</button>
+            <h2 id="booking-modal-title" class="modal-title"><%- content.booking.title %></h2>
+            <p class="modal-subtitle"><%- content.booking.subtitle %></p>
+
+            <form class="booking-form" id="bookingForm" aria-label="Форма запису на процедуру">
+                <div class="form-group">
+                    <label for="name">Ваше ім'я</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">👤</span>
+                        <input type="text" id="name" name="name" placeholder="Ваше ім'я" required autocomplete="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Номер телефону</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">📞</span>
+                        <input type="tel" id="phone" name="phone" placeholder="+380 XX XXX XX XX" required autocomplete="tel">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="service">Бажана процедура</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">✨</span>
+                        <select name="service" id="service" required>
+                            <option value="" disabled selected>Оберіть послугу...</option>
+                            <% content.services.forEach(function(item) { %>
+                            <option value="<%= item.title %>"><%= item.title %></option>
+                            <% }); %>
+                            <option value="Консультація">Консультація</option>
+                            <option value="Інше">Інше</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">ЗАПИСАТИСЬ</button>
+                <p class="form-note"><%- content.booking.note %></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" role="dialog" aria-labelledby="success-modal-title" aria-modal="true">
+        <div class="modal-content" style="text-align: center; padding: 50px 30px; border-radius: 12px; max-width: 450px;">
+            <button class="close-modal" onclick="document.getElementById('successModal').classList.remove('active'); document.body.style.overflow = '';" aria-label="Закрити">&times;</button>
+            <div style="font-size: 60px; color: #8B7A73; margin-bottom: 25px;" aria-hidden="true">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 id="success-modal-title" class="modal-title" style="font-family: 'Cormorant Garamond', serif; font-size: 32px; margin-bottom: 10px; color: #2C2C2C;">
+                Заявку прийнято!</h2>
+            <p class="modal-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 16px; color: #6B5B5B; margin-bottom: 30px; line-height: 1.6;">
+                Дякуємо, що обрали нас. <br>
+                Ми зв'яжемося з вами найближчим часом для підтвердження деталей.
+            </p>
+            <button class="btn btn-primary" style="padding: 12px 40px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;" onclick="document.getElementById('successModal').classList.remove('active'); document.body.style.overflow = '';">Чудово</button>
+        </div>
+    </div>
+
+    <!-- Floating Contact Widget -->
+    <div class="floating-widget" role="complementary" aria-label="Швидкі контакти">
+        <a href="tel:<%= content.site.phoneLink %>" class="widget-btn phone-btn" aria-label="Зателефонувати">
+            <i class="fas fa-phone-alt"></i>
+        </a>
+        <a href="<%= content.site.instagram %>" target="_blank" rel="noopener noreferrer" class="widget-btn insta-btn" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
+
+    <script src="/script.js"></script>
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                this.setAttribute('aria-expanded', navMenu.classList.contains('active'));
+                document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+            });
+            
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenuBtn.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+
+        // Booking Form Handler
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) {
+            bookingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = {
+                    name: this.name.value,
+                    phone: this.phone.value,
+                    service: this.service.value
+                };
+                
+                fetch('/api/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('bookingModal').classList.remove('active');
+                        document.getElementById('successModal').classList.add('active');
+                        this.reset();
+                    } else {
+                        alert('Помилка. Спробуйте ще раз.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Помилка з\'єднання');
+                });
+            });
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

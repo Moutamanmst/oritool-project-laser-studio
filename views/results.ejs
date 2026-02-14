@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title><%= seo.title %></title>
+    <meta name="title" content="<%= seo.title %>">
+    <meta name="description" content="<%= seo.description %>">
+    <% if (seo.keywords) { %>
+    <meta name="keywords" content="<%= seo.keywords %>">
+    <% } %>
+    <meta name="robots" content="<%= seo.robots %>">
+    <meta name="author" content="<%= seo.siteName %>">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= seo.canonical %>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="<%= seo.ogType %>">
+    <meta property="og:url" content="<%= seo.ogUrl %>">
+    <meta property="og:title" content="<%= seo.ogTitle %>">
+    <meta property="og:description" content="<%= seo.ogDescription %>">
+    <meta property="og:image" content="<%= seo.ogImage %>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="<%= seo.siteName %>">
+    <meta property="og:locale" content="<%= seo.locale %>">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<%= seo.ogUrl %>">
+    <meta name="twitter:title" content="<%= seo.ogTitle %>">
+    <meta name="twitter:description" content="<%= seo.ogDescription %>">
+    <meta name="twitter:image" content="<%= seo.ogImage %>">
+    
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#8B7A73">
+    <meta name="geo.region" content="UA-05">
+    <meta name="geo.placename" content="Вінниця">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <% schemas.forEach(function(schema) { %>
+    <script type="application/ld+json"><%- JSON.stringify(schema) %></script>
+    <% }); %>
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Dancing+Script:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="container">
+            <nav class="nav" role="navigation" aria-label="Головна навігація">
+                <a href="/" class="logo" aria-label="<%= seo.siteName %> - На головну">
+                    <span class="logo-text">Laser Studio</span>
+                    <span class="logo-name">Rymarchuk</span>
+                </a>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="/" class="nav-link">Головна</a></li>
+                    <li><a href="/price" class="nav-link">Послуги</a></li>
+                    <li><a href="/results" class="nav-link active" aria-current="page">Результати</a></li>
+                    <li><a href="/blog" class="nav-link">Блог</a></li>
+                    <li><a href="/#contacts" class="nav-link">Контакти</a></li>
+                    <li class="mobile-only"><a href="tel:<%= content.site.phoneLink %>" class="nav-link">📞 Зателефонувати</a></li>
+                </ul>
+                <button class="btn btn-primary" onclick="openBookingModal()" aria-label="Записатись на процедуру">ЗАПИСАТИСЬ</button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Відкрити меню" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Results Section -->
+    <main id="portfolio" class="section portfolio" style="padding-top: 120px;" role="main">
+        <div class="container">
+            <header class="section-header">
+                <h1 class="section-title">Наші роботи</h1>
+                <p class="section-subtitle">Результати лазерної епіляції, які говорять самі за себе</p>
+            </header>
+            
+            <div class="portfolio-grid" role="list" aria-label="Галерея результатів">
+                <% content.portfolio.forEach(function(item, index) { %>
+                <figure class="portfolio-item" role="listitem">
+                    <img src="<%= item.image.startsWith('http') || item.image.startsWith('/') ? item.image : '/' + item.image %>"
+                        alt="<%= item.alt || item.title + ' - результат лазерної епіляції у Вінниці' %>"
+                        loading="<%= index < 4 ? 'eager' : 'lazy' %>"
+                        width="400" height="400">
+                    <figcaption class="portfolio-overlay">
+                        <span><%= item.title %></span>
+                    </figcaption>
+                </figure>
+                <% }); %>
+            </div>
+
+            <div class="text-center" style="margin-top: 40px;">
+                <p style="margin-bottom: 20px; color: var(--color-text-light);">Більше результатів в нашому Instagram</p>
+                <a href="https://www.instagram.com/anna_depilation_vn/" target="_blank" rel="noopener noreferrer" class="btn btn-accent" aria-label="Перейти в наш Instagram">
+                    ПЕРЕЙТИ В INSTAGRAM
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacts" class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h2>Rymarchuk</h2>
+                    <p class="footer-text"><%- content.site.footerText %></p>
+                </div>
+
+                <div class="footer-column">
+                    <h2>Контакти</h2>
+                    <address class="footer-contact">
+                        <p>📍 м. Вінниця, вул. Соборна, 41</p>
+                        <p>📞 <a href="tel:<%= content.site.phoneLink %>" style="color: inherit; text-decoration: none;"><%= content.site.phone %></a></p>
+                    </address>
+                </div>
+                <div class="footer-column">
+                    <h2>Соцмережі</h2>
+                    <div class="social-links">
+                        <a href="<%= content.site.instagram %>" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="viber://add?number=<%= content.site.phoneLink.replace('+', '') %>" target="_blank" class="social-link" aria-label="Viber">
+                            <i class="fab fa-viber" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <%= new Date().getFullYear() %> Laser Studio. Всі права захищено.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal" role="dialog" aria-labelledby="booking-modal-title" aria-modal="true">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()" aria-label="Закрити">&times;</button>
+            <div class="modal-header-visual">
+                <h2 id="booking-modal-title" class="modal-title">Запис на процедуру</h2>
+                <p class="modal-subtitle">Ваша ідеальна шкіра починається тут</p>
+            </div>
+            <form id="bookingForm" class="booking-form" aria-label="Форма запису на процедуру">
+                <div class="form-group">
+                    <label for="name">Ваше ім'я</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">👤</span>
+                        <input type="text" id="name" name="name" placeholder="Введіть ваше ім'я" required autocomplete="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Номер телефону</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">📞</span>
+                        <input type="tel" id="phone" name="phone" placeholder="+380 XX XXX XX XX" required autocomplete="tel">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="service">Оберіть зону</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon" aria-hidden="true">✨</span>
+                        <select id="service" name="service" required>
+                            <option value="" disabled selected>Оберіть послугу...</option>
+                            <option value="Ноги повністю">Ноги повністю</option>
+                            <option value="Глибоке бікіні">Глибоке бікіні</option>
+                            <option value="Пахви">Пахви</option>
+                            <option value="Обличчя">Обличчя</option>
+                            <option value="Комплекс (Все тіло)">Комплекс (Все тіло)</option>
+                            <option value="Консультація">Консультація</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-submit">ЗАПИСАТИСЬ ОНЛАЙН</button>
+                <p class="form-note">Ми зв'яжемось з вами протягом 15 хвилин для підтвердження</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" role="dialog" aria-labelledby="success-modal-title" aria-modal="true">
+        <div class="modal-content" style="text-align: center; padding: 50px 30px; border-radius: 12px; max-width: 450px;">
+            <button class="close-modal" onclick="window.location.href='/results'" aria-label="Закрити">&times;</button>
+            <div style="font-size: 60px; color: #8B7A73; margin-bottom: 25px;" aria-hidden="true">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 id="success-modal-title" class="modal-title" style="font-family: 'Cormorant Garamond', serif; font-size: 32px; margin-bottom: 10px; color: #2C2C2C;">
+                Заявку прийнято!</h2>
+            <p class="modal-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 16px; color: #6B5B5B; margin-bottom: 30px; line-height: 1.6;">
+                Дякуємо, що обрали нас. <br>
+                Ми зв'яжемося з вами найближчим часом.
+            </p>
+            <button class="btn btn-primary" style="padding: 12px 40px; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;" onclick="window.location.href='/results'">Чудово</button>
+        </div>
+    </div>
+
+    <!-- Floating Contact Widget -->
+    <div class="floating-widget" role="complementary" aria-label="Швидкі контакти">
+        <a href="tel:+380632777543" class="widget-btn phone-btn" aria-label="Зателефонувати">
+            <i class="fas fa-phone-alt" aria-hidden="true"></i>
+        </a>
+        <a href="https://www.instagram.com/anna_depilation_vn/" target="_blank" rel="noopener noreferrer" class="widget-btn insta-btn" aria-label="Instagram">
+            <i class="fab fa-instagram" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                this.setAttribute('aria-expanded', navMenu.classList.contains('active'));
+                document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+            });
+            
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenuBtn.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+        
+        function openBookingModal(serviceName) {
+            const modal = document.getElementById('bookingModal');
+            const serviceSelect = document.getElementById('service');
+
+            if (serviceName) {
+                for (let i = 0; i < serviceSelect.options.length; i++) {
+                    if (serviceSelect.options[i].value === serviceName) {
+                        serviceSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                serviceSelect.selectedIndex = 0;
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            setTimeout(() => {
+                document.getElementById('name').focus();
+            }, 100);
+        }
+        
+        function closeModal() {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: this.name.value,
+                phone: this.phone.value,
+                service: this.service.value
+            };
+
+            fetch('/api/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeModal();
+                        document.getElementById('successModal').classList.add('active');
+                        this.reset();
+                    } else {
+                        alert('Сталася помилка. Спробуйте ще раз.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Сталася помилка. Спробуйте ще раз.');
+                });
+        });
+
+        // Header button handler
+        document.querySelector('.header .btn-primary').onclick = function (e) {
+            e.preventDefault();
+            openBookingModal();
+        };
+        
+        // Keyboard accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
